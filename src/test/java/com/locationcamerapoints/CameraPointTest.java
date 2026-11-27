@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class CameraPointTest
 {
-	private final CameraPoint point = new CameraPoint("Bank", 3200, 3200, 0, 2, CameraDirection.EAST, true, 600, true);
+	private final CameraPoint point = new CameraPoint("Bank", 3200, 3200, 0, 2, CameraDirection.EAST, true, 600, true, true);
 
 	@Test
 	public void insideRadiusReturnsDistance()

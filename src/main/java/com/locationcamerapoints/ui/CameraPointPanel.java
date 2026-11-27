@@ -4,8 +4,12 @@ import com.locationcamerapoints.CameraDirection;
 import com.locationcamerapoints.CameraPoint;
 import com.locationcamerapoints.LocationCameraPointsPlugin;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.function.IntConsumer;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -36,8 +40,13 @@ class CameraPointPanel extends JPanel
 	private static final int MAX_RADIUS = 104;
 	private static final int ROW_GAP = 4;
 
+	private static final String EXPANDED_ARROW = "\u25BC";
+	private static final String COLLAPSED_ARROW = "\u25B6";
+
 	private final LocationCameraPointsPlugin plugin;
 	private final CameraPoint point;
+	private final JPanel header = new JPanel(new BorderLayout(4, 0));
+	private final JPanel body = new JPanel(new BorderLayout());
 
 	CameraPointPanel(LocationCameraPointsPlugin plugin, CameraPoint point, boolean canMoveUp, boolean canMoveDown)
 	{
@@ -50,16 +59,59 @@ class CameraPointPanel extends JPanel
 			BorderFactory.createMatteBorder(0, 3, 0, 0, point.isEnabled() ? ColorScheme.BRAND_ORANGE : ColorScheme.MEDIUM_GRAY_COLOR),
 			new EmptyBorder(6, 6, 6, 6)));
 
+		body.setOpaque(false);
+		body.add(createFields(), BorderLayout.CENTER);
+		body.add(createActions(canMoveUp, canMoveDown), BorderLayout.SOUTH);
+
 		add(createHeader(), BorderLayout.NORTH);
-		add(createFields(), BorderLayout.CENTER);
-		add(createActions(canMoveUp, canMoveDown), BorderLayout.SOUTH);
+		add(body, BorderLayout.CENTER);
+		setCollapsed(point.isCollapsed());
+	}
+
+	/**
+	 * Collapsed points show only the header (name and enabled toggle).
+	 */
+	private void setCollapsed(boolean collapsed)
+	{
+		body.setVisible(!collapsed);
+		header.setBorder(new EmptyBorder(0, 0, collapsed ? 0 : 6, 0));
+		revalidate();
+		repaint();
 	}
 
 	private JComponent createHeader()
 	{
-		JPanel header = new JPanel(new BorderLayout(4, 0));
 		header.setOpaque(false);
-		header.setBorder(new EmptyBorder(0, 0, 6, 0));
+
+		JLabel collapse = new JLabel(point.isCollapsed() ? COLLAPSED_ARROW : EXPANDED_ARROW);
+		collapse.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		collapse.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		collapse.setToolTipText(point.isCollapsed() ? "Expand" : "Collapse");
+		collapse.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				point.setCollapsed(!point.isCollapsed());
+				plugin.savePoints();
+				collapse.setText(point.isCollapsed() ? COLLAPSED_ARROW : EXPANDED_ARROW);
+				collapse.setToolTipText(point.isCollapsed() ? "Expand" : "Collapse");
+				setCollapsed(point.isCollapsed());
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				collapse.setForeground(Color.WHITE);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				collapse.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+			}
+		});
+		header.add(collapse, BorderLayout.WEST);
 
 		JTextField name = new JTextField(point.getName());
 		name.setToolTipText("Point name");

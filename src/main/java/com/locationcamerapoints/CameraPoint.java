@@ -26,6 +26,10 @@ public class CameraPoint
 	private boolean zoomEnabled;
 	private int zoom;
 	private boolean enabled;
+	/**
+	 * Whether the point is collapsed in the side panel.
+	 */
+	private boolean collapsed;
 
 	public WorldPoint toWorldPoint()
 	{

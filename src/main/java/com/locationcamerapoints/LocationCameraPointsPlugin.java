@@ -345,7 +345,7 @@ public class LocationCameraPointsPlugin extends Plugin
 			config.defaultRadius(),
 			CameraDirection.fromYaw(yaw),
 			true, zoom,
-			true);
+			true, false);
 
 		// The new point captures the current camera, so triggering it right away is harmless
 		points.add(point);
